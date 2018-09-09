@@ -1,0 +1,1167 @@
+swagger: "2.0"
+
+info:
+  title: "Summer Intern 2018 API"
+  description: "
+                ・ デーティングアプリのMVPを作るためのAPIです <br>\
+                <br>\
+                ・ `Try It Out` ボタンを押すとcurlのサンプルが表示できます <br>\
+                ・ `si-2018-XXX.eure.jp` サーバにcurlするときは、必ず`https` でcurlしてください ( httpはhttpsにリダイレクトされます ) <br>\
+                <br>\
+                ・ ダミーデータとして `ID 1 〜 1000` に 男性ユーザ , `ID 1001 〜 2000` に 女性ユーザ が入っています <br>\
+                ・ トークンは `GET /tokens/{userId}` で取得してほしいですが、簡単のため `USERTOKEN{USERID}` 形式の連番で生成しています <br>\
+                ・ 女性ユーザー `ID 1111` は 被いいねの多いユーザーで, 男性 `ID 1 〜 100` からいいねをもらっています <br>\
+                ・ 女性ユーザー `ID 1112` は マッチングの多いユーザーで, 男性 `ID 1 〜 200` とマッチしています <br>\
+                ・ 男性ユーザー `ID222` と,女性ユーザー `ID1222` はマッチとメッセージを何通かやりとりしているダミーです <br>\
+                <br>\
+                ・ 探す画面では likeした/された お相手、マッチ済みのお相手 が返ってこない仕様です <br>\
+                ・ いいねをくれたお相手は、 `GET /likes/` で、マッチ済みのお相手は `GET /matches/` で一覧が取れます <br>\
+                ・ 自分がLIKEをしたお相手は、API経由で確認する方法は未実装です <br>\
+               "
+  version: "1.0.0"
+
+host: "si-2018-second-half-2.eure.jp"
+basePath: "/api/1.0"
+
+schemes:
+- "http" # ドキュメント上httpだがALBでhttps化されており、http は 304 redirect to https. ローカルでは普通にhttpでOK
+
+consumes:
+- application/json
+produces:
+- application/json
+
+parameters:
+  userIdParam:
+    in: "path"
+    name: "userId"
+    description: "ID of user"
+    required: true
+    type: "integer"
+    format: "int64"
+
+definitions:
+  UserToken:
+    type: "object"
+    properties:
+      user_id:
+        type: "integer"
+        example: "1"
+        format: "int64"
+        description: "ユーザーID"
+      token:
+        type: "string"
+        example: "YOUR_ACCESS_TOKEN"
+        description: "アクセストークン"
+      created_at:
+        type: "string"
+        format: date-time
+        description: "作成日"
+        example: "2018-08-22T23:40:22.000+09:00"
+      updated_at:
+        type: "string"
+        format: date-time
+        description: "更新日"
+        example: "2018-08-22T23:40:22.000+09:00"
+    xml:
+      name: "UserToken"
+
+  UserImage:
+    type: "object"
+    properties:
+      user_id:
+        type: "integer"
+        format: "int64"
+        description: "ユーザーID"
+      path:
+        type: "string"
+        example: "https://si-2018-000.eure.jp/assets/pose_kandou_man.png"
+        description: "プロフィール画像のURL"
+      created_at:
+        type: "string"
+        format: date-time
+        description: "作成日"
+        example: "2018-08-22T23:40:22.000+09:00"
+      updated_at:
+        type: "string"
+        format: date-time
+        description: "更新日"
+        example: "2018-08-22T23:40:22.000+09:00"
+    xml:
+      name: "UserImage"
+
+  User:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+        description: "ユーザーID"
+        example: "1"
+      gender:
+        type: "string"
+        description: "M or F string"
+      birthday:
+        type: "string"
+        format: date
+        description: "誕生日"
+        example: "1994-02-06"
+      nickname:
+        type: "string"
+        description: "ニックネーム"
+      image_uri:
+        type: "string"
+        description: "プロフィール画像のURL"
+        example: "https://si-2018-000.eure.jp/assets/pose_kandou_man.png"
+      tweet:
+        type: "string"
+        description: "Tweet"
+      introduction:
+        type: "string"
+        description: "自己紹介"
+      residence_state:
+        type: "string"
+        description: "居住地"
+      home_state:
+        type: "string"
+        description: "出身地"
+      education:
+        type: "string"
+        description: "学歴"
+      job:
+        type: "string"
+        description: "仕事"
+      annual_income:
+        type: "string"
+        description: "年収"
+      height:
+        type: "string"
+        description: "身長"
+      body_build:
+        type: "string"
+        description: "体型"
+      marital_status:
+        type: "string"
+        description: "結婚歴"
+      child:
+        type: "string"
+        description: "子供"
+      when_marry:
+        type: "string"
+        description: "結婚の意志"
+      want_child:
+        type: "string"
+        description: "子供が欲しいか？"
+      smoking:
+        type: "string"
+        description: "タバコを吸うか？"
+      drinking:
+        type: "string"
+        description: "お酒を飲むか？"
+      holiday:
+        type: "string"
+        description: "休日"
+      how_to_meet:
+        type: "string"
+        description: "出会うまでの希望"
+      cost_of_date:
+        type: "string"
+        description: ""
+      nth_child:
+        type: "string"
+        description: "長男長女...etc"
+      housework:
+        type: "string"
+        description: "家事"
+      created_at:
+        type: "string"
+        format: date-time
+        description: "作成日"
+        example: "2018-08-22T23:40:22.000+09:00"
+      updated_at:
+        type: "string"
+        format: date-time
+        description: "更新日"
+        example: "2018-08-22T23:40:22.000+09:00"
+    xml:
+      name: "User"
+
+  UserLike:
+    type: "object"
+    properties:
+      user_id:
+        type: "integer"
+        format: "int64"
+        description: "いいねを送信したユーザー"
+      partner_id:
+        type: "integer"
+        format: "int64"
+        description: "いいねをもらったユーザー"
+      created_at:
+        type: "string"
+        format: date-time
+        description: "作成日"
+        example: "2018-08-22T23:40:22.000+09:00"
+      updated_at:
+        type: "string"
+        format: date-time
+        description: "更新日"
+        example: "2018-08-22T23:40:22.000+09:00"
+    xml:
+      name: "UserLike"
+
+  UserMatch:
+    type: "object"
+    properties:
+      user_id:
+        type: "integer"
+        format: "int64"
+        description: "いいねを先に送ったユーザー"
+      partner_id:
+        type: "integer"
+        format: "int64"
+        description: "ありがとういいねを送ったユーザー"
+      created_at:
+        type: "string"
+        format: date-time
+        description: "作成日"
+        example: "2018-08-22T23:40:22.000+09:00"
+      updated_at:
+        type: "string"
+        format: date-time
+        description: "更新日"
+        example: "2018-08-22T23:40:22.000+09:00"
+    xml:
+      name: "UserMatch"
+
+  UserMessage:
+    type: "object"
+    properties:
+      user_id:
+        type: "integer"
+        format: "int64"
+        description: "メッセージを送ったユーザー"
+      partner_id:
+        type: "integer"
+        format: "int64"
+        description: "メッセージを受け取ったユーザー"
+      message:
+        type: "string"
+        description: "メッセージ内容"
+      created_at:
+        type: "string"
+        format: date-time
+        description: "作成日"
+        example: "2018-08-22T23:40:22.000+09:00"
+      updated_at:
+        type: "string"
+        format: date-time
+        description: "更新日"
+        example: "2018-08-22T23:40:22.000+09:00"
+    xml:
+      name: "UserMessage"
+
+  LikeUserResponse:
+    type: "object"
+    description: "likeエンドポイントのレスポンス. Likeの送信日時 + ユーザーのプロフィール情報"
+    properties:
+      liked_at:
+        type: "string"
+        format: date-time
+        description: "Like送信日時"
+        example: "2018-08-22T23:40:22.000+09:00"
+      id:
+        type: "integer"
+        format: "int64"
+        description: "ユーザーID"
+        example: "1"
+      gender:
+        type: "string"
+        description: "M or F string"
+      birthday:
+        type: "string"
+        format: date
+        description: "誕生日"
+        example: "1994-02-06"
+      nickname:
+        type: "string"
+        description: "ニックネーム"
+      image_uri:
+        type: "string"
+        description: "プロフィール画像のURL"
+        example: "https://si-2018-000.eure.jp/assets/pose_kandou_man.png"
+      tweet:
+        type: "string"
+        description: "Tweet"
+      introduction:
+        type: "string"
+        description: "自己紹介"
+      residence_state:
+        type: "string"
+        description: "居住地"
+      home_state:
+        type: "string"
+        description: "出身地"
+      education:
+        type: "string"
+        description: "学歴"
+      job:
+        type: "string"
+        description: "仕事"
+      annual_income:
+        type: "string"
+        description: "年収"
+      height:
+        type: "string"
+        description: "身長"
+      body_build:
+        type: "string"
+        description: "体型"
+      marital_status:
+        type: "string"
+        description: "結婚歴"
+      child:
+        type: "string"
+        description: "子供"
+      when_marry:
+        type: "string"
+        description: "結婚の意志"
+      want_child:
+        type: "string"
+        description: "子供が欲しいか？"
+      smoking:
+        type: "string"
+        description: "タバコを吸うか？"
+      drinking:
+        type: "string"
+        description: "お酒を飲むか？"
+      holiday:
+        type: "string"
+        description: "休日"
+      how_to_meet:
+        type: "string"
+        description: "出会うまでの希望"
+      cost_of_date:
+        type: "string"
+        description: ""
+      nth_child:
+        type: "string"
+        description: "長男長女...etc"
+      housework:
+        type: "string"
+        description: "家事"
+      created_at:
+        type: "string"
+        format: date-time
+        description: "作成日"
+        example: "2018-08-22T23:40:22.000+09:00"
+      updated_at:
+        type: "string"
+        format: date-time
+        description: "更新日"
+        example: "2018-08-22T23:40:22.000+09:00"
+    xml:
+      name: "LikeUserResponse"
+
+  MatchUserResponse:
+    type: "object"
+    description: "matchエンドポイントのレスポンス. match日時 + ユーザーのプロフィール情報"
+    properties:
+      matched_at:
+        type: "string"
+        format: date-time
+        description: "Match送信日時"
+        example: "2018-08-22T23:40:22.000+09:00"
+      id:
+        type: "integer"
+        format: "int64"
+        description: "ユーザーID"
+        example: "1"
+      gender:
+        type: "string"
+        description: "M or F string"
+      birthday:
+        type: "string"
+        format: date
+        description: "誕生日"
+        example: "1994-02-06"
+      nickname:
+        type: "string"
+        description: "ニックネーム"
+      image_uri:
+        type: "string"
+        description: "プロフィール画像のURL"
+        example: "https://si-2018-000.eure.jp/assets/pose_kandou_man.png"
+      tweet:
+        type: "string"
+        description: "Tweet"
+      introduction:
+        type: "string"
+        description: "自己紹介"
+      residence_state:
+        type: "string"
+        description: "居住地"
+      home_state:
+        type: "string"
+        description: "出身地"
+      education:
+        type: "string"
+        description: "学歴"
+      job:
+        type: "string"
+        description: "仕事"
+      annual_income:
+        type: "string"
+        description: "年収"
+      height:
+        type: "string"
+        description: "身長"
+      body_build:
+        type: "string"
+        description: "体型"
+      marital_status:
+        type: "string"
+        description: "結婚歴"
+      child:
+        type: "string"
+        description: "子供"
+      when_marry:
+        type: "string"
+        description: "結婚の意志"
+      want_child:
+        type: "string"
+        description: "子供が欲しいか？"
+      smoking:
+        type: "string"
+        description: "タバコを吸うか？"
+      drinking:
+        type: "string"
+        description: "お酒を飲むか？"
+      holiday:
+        type: "string"
+        description: "休日"
+      how_to_meet:
+        type: "string"
+        description: "出会うまでの希望"
+      cost_of_date:
+        type: "string"
+        description: ""
+      nth_child:
+        type: "string"
+        description: "長男長女...etc"
+      housework:
+        type: "string"
+        description: "家事"
+      created_at:
+        type: "string"
+        format: date-time
+        description: "作成日"
+        example: "2018-08-22T23:40:22.000+09:00"
+      updated_at:
+        type: "string"
+        format: date-time
+        description: "更新日"
+        example: "2018-08-22T23:40:22.000+09:00"
+    xml:
+      name: "MatchUserResponse"
+
+paths:
+  /tokens/{userId}:
+    get:
+      summary: "トークンの取得"
+      description: "
+        すべてのリクエストは、パラメータにこのトークンを入れて送ります。 <br>\
+        リクエストがどのユーザーからの来たのかという判定に使っています。 <br>\
+        簡単のためログイン処理などを簡略化していて、任意のユーザのトークンをこのエンドポイントで取得できます。 <br>\
+      "
+      operationId: "getTokenByUserId"
+      parameters:
+      - $ref: '#/parameters/userIdParam'
+      responses:
+        200:
+          description: "OK (user tokenが返る)"
+          schema:
+            $ref: "#/definitions/UserToken"
+        400:
+          description: "Bad Request"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "400"
+              message:
+                type: "string"
+                example: "Bad Request"
+        404:
+          description: "User Token Not Found"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "404"
+              message:
+                type: "string"
+                example: "User Token Not Found"
+        500:
+          description: "Internal Server Error"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "500"
+              message:
+                type: "string"
+                example: "Internal Server Error"
+
+  /users/:
+    get:
+      summary: "プロフィール一覧"
+      description: "
+        お相手を探す画面で使う想定です. <br>\
+        異性のユーザーのプロフィールが、登録日(created_at)の新しい順に返ってきます <br>\
+        いいねを送信済みのユーザー, マッチ済みのユーザーは含まれません <br>\
+        ページングのためにlimit, offsetを用います <br>\
+      "
+      parameters:
+      - in: query
+        name: token
+        required: true
+        description: "ログイントークン"
+        type: string
+      - in: query
+        name: limit
+        required: true
+        description: "取得件数"
+        type: integer
+      - in: query
+        name: offset
+        required: true
+        description: "オフセット"
+        type: integer
+      responses:
+        200:
+          description: "OK. (ユーザーデータの一覧を返す.)"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/User"
+        400:
+          description: "Bad Request"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "400"
+              message:
+                type: "string"
+                example: "Bad Request"
+        401:
+          description: "Unauthorized (トークン認証に失敗)"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "401"
+              message:
+                type: "string"
+                example: "Your Token Is Invalid"
+        500:
+          description: "Internal Server Error"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "500"
+              message:
+                type: "string"
+                example: "Internal Server Error"
+
+  /users/{userId}:
+    get:
+      summary: "プロフィール取得"
+      description: "
+        指定したIDのユーザー情報を返します. <br>\
+        返ってくるプロフィールの項目は GET /users/ と同じです. <br>\
+      "
+      operationId: "getProfileByUserId"
+      parameters:
+      - $ref: '#/parameters/userIdParam'
+      - in: query
+        required: true
+        name: token
+        type: string
+      responses:
+        200:
+          description: "OK. (そのIDのユーザーが存在している. ユーザー情報を返す.)"
+          schema:
+            $ref: "#/definitions/User"
+        400:
+          description: "Bad Request"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "400"
+              message:
+                type: "string"
+                example: "Bad Request"
+        401:
+          description: "Unauthorized (トークン認証に失敗)"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "401"
+              message:
+                type: "string"
+                example: "Token Is Invalid"
+        404:
+          description: "User Not Found. (そのIDのユーザーは存在しません.)"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "404"
+              message:
+                type: "string"
+                example: "User Not Found"
+        500:
+          description: "Internal Server Error"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "500"
+              message:
+                type: "string"
+                example: "Internal Server Error"
+    put:
+      summary: "プロフィール更新"
+      description: "
+        (自分の) プロフィールを更新するためのエンドポイントです。 <br>\
+        変更したいプロフィール項目のみをparamsに入れてPUTしてください. <br>\
+        ユーザー画像の更新は、別途 `POST /images/` で行ってください. <br>\
+      "
+      operationId: "putProfile"
+      parameters:
+      - $ref: '#/parameters/userIdParam'
+      - in: body
+        required: true
+        name: params
+        schema:
+          type: object
+          properties:
+            token:
+              type: string
+              example: "YOUR_LOGIN_TOKEN"
+            nickname:
+              type: string
+            image_uri:
+              type: string
+            tweet:
+              type: string
+            introduction:
+              type: string
+            residence_state:
+              type: string
+            home_state:
+              type: string
+            education:
+              type: string
+            job:
+              type: string
+            annual_income:
+              type: string
+            height:
+              type: string
+            body_build:
+              type: string
+            marital_status:
+              type: string
+            child:
+              type: string
+            when_marry:
+              type: string
+            want_child:
+              type: string
+            smoking:
+              type: string
+            drinking:
+              type: string
+            holiday:
+              type: string
+            how_to_meet:
+              type: string
+            cost_of_date:
+              type: string
+            nth_child:
+              type: string
+            housework:
+              type: string
+      responses:
+        200:
+          description: "OK. (更新後のUser情報全体が返る.)"
+          schema:
+            $ref: "#/definitions/User"
+        400:
+          description: "Bad Request"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "400"
+              message:
+                type: "string"
+                example: "Bad Request"
+        401:
+          description: "Unauthorized (トークン認証に失敗)"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "401"
+              message:
+                type: "string"
+                example: "Token Is Invalid"
+        403:
+          description: "Forbidden. (他の人のプロフィールは更新できません.)"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "403"
+              message:
+                type: "string"
+                example: "Forbidden"
+        500:
+          description: "Internal Server Error"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "500"
+              message:
+                type: "string"
+                example: "Internal Server Error"
+
+  /likes:
+    get:
+      summary: "自分にいいねを送ってくれたユーザーを取得"
+      description: "
+        いいねを送ってくれたユーザーの一覧です. <br>\
+        並び順はいいねの送信日時が新しい順になっています. <br>\
+        マッチ済みのユーザは含まれません. <br>\
+        ページングのためにlimit, offsetを用います. <br>\
+      "
+      operationId: "getLikes"
+      parameters:
+      - in: query
+        required: true
+        name: token
+        description: token
+        type: string
+      - in: query
+        required: true
+        name: limit
+        description: "取得件数"
+        type: integer
+      - in: query
+        required: true
+        name: offset
+        description: "オフセット"
+        type: integer
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/LikeUserResponse"
+              
+        400:
+          description: "Bad Request"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "400"
+              message:
+                type: "string"
+                example: "Bad Request"
+        401:
+          description: "Unauthorized (トークン認証に失敗)"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "401"
+              message:
+                type: "string"
+                example: "Token Is Invalid"
+        500:
+          description: "Internal Server Error"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "500"
+              message:
+                type: "string"
+                example: "Internal Server Error"
+
+  /likes/{userId}:
+    post:
+      summary: "いいね送信"
+      description: "
+        いいねを送信する <br>\
+        既に向こうからいいねを送ってもらっている状態でユーザにいいねを送ると、マッチング状態になります. <br>\
+      "
+      operationId: "postLike"
+      parameters:
+      - $ref: '#/parameters/userIdParam'
+      - in: body
+        name: params
+        description: リクエストパラメータ
+        schema:
+          type: object
+          properties:
+            token:
+              type: string
+              example: "YOUR_LOGIN_TOKEN"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "200"
+              message:
+                type: "string"
+                example: "OK"
+        400:
+          description: "Bad Request"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "400"
+              message:
+                type: "string"
+                example: "Bad Request"
+        401:
+          description: "Unauthorized (トークン認証に失敗)"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "401"
+              message:
+                type: "string"
+                example: "Token Is Invalid"
+        500:
+          description: "Internal Server Error"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "500"
+              message:
+                type: "string"
+                example: "Internal Server Error"
+
+  /matches:
+    get:
+      summary: "マッチングしているお相手一覧"
+      description: "
+        マッチングしているお相手一覧です. <br>\
+        つまりメッセージを送信することが可能なユーザー一覧です. <br>\
+        並び順はマッチ日時が新しい順になっています. <br>\
+      "
+      parameters:
+      - in: query
+        required: true
+        name: token
+        description: "UserLoginToken"
+        type: string
+      - in: query
+        required: true
+        description: "取得件数"
+        name: limit
+        type: integer
+      - in: query
+        required: true
+        name: offset
+        description: "オフセット"
+        type: integer
+      responses:
+        200:
+          description: "OK. (ユーザーデータの一覧を返す.)"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/MatchUserResponse"
+        400:
+          description: "Bad Request"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "400"
+              message:
+                type: "string"
+                example: "Bad Request"
+        401:
+          description: "Unauthorized (トークン認証に失敗)"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "401"
+              message:
+                type: "string"
+                example: "Token Is Invalid"
+        500:
+          description: "Internal Server Error"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "500"
+              message:
+                type: "string"
+                example: "Internal Server Error"
+
+  /messages/{userId}:
+    get:
+      summary: "メッセージ一覧を表示"
+      description: "
+        指定したIDのお相手とやりとりしたメッセージ内容を取得します。 <br>\
+        user_idが送信者, partner_idが受信者です. <br>\
+        latest / oldest / limit 方式での取得です. <br>\
+        latest / oldest は ISO8601(RFC3339) 形式で指定してください. <br>\
+      "
+
+      operationId: "getMessages"
+      parameters:
+      - $ref: '#/parameters/userIdParam'
+      - in: query
+        required: true
+        name: token
+        description: "ログイントークン"
+        type: string
+      - in: query
+        required: false
+        name: latest
+        description: "RFC3339 ex. 2018-08-20T16:00:00.000+09:00"
+        format: date-time
+        type: string
+      - in: query
+        required: false
+        name: oldest
+        description: "RFC3339 ex. 2018-08-20T16:00:00.000+09:00"
+        format: date-time
+        type: string
+      - in: query
+        required: true
+        name: limit
+        description: "取得件数"
+        type: integer
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/UserMessage"
+        400:
+          description: "Bad Request"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "400"
+              message:
+                type: "string"
+                example: "Bad Request"
+        401:
+          description: "Unauthorized (トークン認証に失敗)"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "401"
+              message:
+                type: "string"
+                example: "Token Is Invalid"
+        500:
+          description: "Internal Server Error"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "500"
+              message:
+                type: "string"
+                example: "Internal Server Error"
+    post:
+      summary: "メッセージ送信"
+      description: "
+        マッチ済みのお相手にメッセージを送ることができます. <br>\
+      "
+      operationId: "postMessage"
+      parameters:
+      - $ref: '#/parameters/userIdParam'
+      - in: body
+        name: params
+        description: リクエストパラメータ
+        schema:
+          type: object
+          properties:
+            token:
+              type: string
+              example: "YOUR_LOGIN_TOKEN"
+            message:
+              type: string
+              example: "こんにちは！"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "200"
+              message:
+                type: "string"
+                example: "OK"
+        400:
+          description: "Bad Request"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "400"
+              message:
+                type: "string"
+                example: "Bad Request"
+        401:
+          description: "Unauthorized (トークン認証に失敗)"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "401"
+              message:
+                type: "string"
+                example: "Token Is Invalid"
+        500:
+          description: "Internal Server Error"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "500"
+              message:
+                type: "string"
+                example: "Internal Server Error"
+
+  /images:
+    post:
+      summary: "プロフィール写真のアップロードおよび更新"
+      description: "
+        base64エンコードされたjpg/pngをリクエストに含めてください. <br>\
+        正常にアップロード&更新されたとき、200レスポンスとともに画像のURIが返ってきます. <br>\
+        画像以外のプロフィール更新には `PUT /users/{userId}` を利用してください. <br>\
+      "
+      operationId: "postImages"
+      parameters:
+      - in: body
+        name: params
+        description: リクエストパラメータ
+        schema:
+          type: object
+          properties:
+            token:
+              type: string
+              example: "YOUR_LOGIN_TOKEN"
+            image:
+              type: string
+              format: byte
+              example: "/9j/4AAQSkZJRgABAQEASABIA...(省略)"
+              description: "base64エンコードされた画像データ. jpg/pngをアップロード可能"
+      responses:
+        200:
+          description: "OK (正常にアップロードされた)"
+          schema:
+            type: object
+            properties:
+              image_uri:
+                type: "string"
+                example: "https://si-2018-000.eure.jp/assets/pose_kandou_man.png"
+                format: "uri"
+                description: "アップロードされた画像のURI"
+        400:
+          description: "Bad Request"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "400"
+              message:
+                type: "string"
+                example: "Bad Request"
+        401:
+          description: "Unauthorized (トークン認証に失敗)"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "401"
+              message:
+                type: "string"
+                example: "Token Is Invalid"
+        500:
+          description: "Internal Server Error"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "500"
+              message:
+                type: "string"
+                example: "Internal Server Error"

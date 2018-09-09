@@ -1,0 +1,23 @@
+# go swagger generated directories
+/client/*
+/models/*
+/cmd/*
+/restapi/summerintern/*
+/restapi/doc.go
+/restapi/embedded_spec.go
+/restapi/server.go
+
+# assets (uploaded image files)
+assets/
+
+# dep
+vendor/
+
+# (^_^)
+.DS_Store
+.idea/
+
+.envrc
+
+# build
+main
