@@ -1,8 +1,8 @@
 -- +goose Up
 -- SQL in section 'Up' is executed when this migration is applied
 CREATE TABLE IF NOT EXISTS `user_temp_match` (
-  `user_id` bigint(20) unsigned NOT NULL COMMENT 'いいねを先に送ったユーザー',
-  `partner_id` bigint(20) unsigned NOT NULL COMMENT 'ありがとういいねを送ったユーザー',
+  `user_id` bigint(20) unsigned NOT NULL COMMENT 'ユーザのID',
+  `partner_id` bigint(20) unsigned NOT NULL COMMENT 'パートナーのID',
   `created_at` datetime NOT NULL COMMENT 'レコード作成日時',
   `updated_at` datetime NOT NULL COMMENT 'レコード更新日時',
   PRIMARY KEY (`user_id`, `partner_id`),
