@@ -465,6 +465,87 @@ definitions:
     xml:
       name: "MatchUserResponse"
 
+  UserWaitTempMatch:
+    type: "object"
+    properties:
+      user_id:
+        type: "integer"
+        format: "int64"
+        description: "ユーザーID"
+        example: "1"
+      gender:
+        type: "string"
+        description: "M or F string"
+      is_matched:
+        type: "boolean"
+        description: "仮マッチしているかどうか"
+      is_canceled:
+        type: "boolean"
+        description: "リクエストがキャンセルされたかどうか"
+      created_at:
+        type: "string"
+        format: date-time
+        description: "作成日"
+        example: "2018-08-22T23:40:22.000+09:00"
+      updated_at:
+        type: "string"
+        format: date-time
+        description: "更新日"
+        example: "2018-08-22T23:40:22.000+09:00"
+    xml:
+      name: "UserWaitTempMatch"
+
+  UserTempMatch:
+    type: "object"
+    properties:
+      user_id:
+        type: "integer"
+        format: "int64"
+        description: "ユーザーID"
+      partner_id:
+        type: "integer"
+        format: "int64"
+        description: "パートナーID"
+      created_at:
+        type: "string"
+        format: date-time
+        description: "作成日"
+        example: "2018-08-22T23:40:22.000+09:00"
+      updated_at:
+        type: "string"
+        format: date-time
+        description: "更新日"
+        example: "2018-08-22T23:40:22.000+09:00"
+    xml:
+      name: "UserTempMatch"
+
+  UserTempMessage:
+    type: "object"
+    properties:
+      user_id:
+        type: "integer"
+        format: "int64"
+        description: "メッセージを送ったユーザー"
+      partner_id:
+        type: "integer"
+        format: "int64"
+        description: "メッセージを受け取ったユーザー"
+      message:
+        type: "string"
+        description: "メッセージ内容"
+      created_at:
+        type: "string"
+        format: date-time
+        description: "作成日"
+        example: "2018-08-22T23:40:22.000+09:00"
+      updated_at:
+        type: "string"
+        format: date-time
+        description: "更新日"
+        example: "2018-08-22T23:40:22.000+09:00"
+    xml:
+      name: "UserTempMessage"
+
 paths:
   /tokens/{userId}:
     get:
@@ -1132,6 +1213,310 @@ paths:
                 example: "https://si-2018-000.eure.jp/assets/pose_kandou_man.png"
                 format: "uri"
                 description: "アップロードされた画像のURI"
+        400:
+          description: "Bad Request"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "400"
+              message:
+                type: "string"
+                example: "Bad Request"
+        401:
+          description: "Unauthorized (トークン認証に失敗)"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "401"
+              message:
+                type: "string"
+                example: "Token Is Invalid"
+        500:
+          description: "Internal Server Error"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "500"
+              message:
+                type: "string"
+                example: "Internal Server Error"
+  /tempmatch:
+    get:
+      summary: "仮マッチしたユーザーを取得する"
+      description: "
+        仮マッチしたユーザーを取得します．<br>\
+        自身とパートナーのID，仮マッチした日時の情報がはいっています．<br>\
+      "
+      operationId: "getTempMatch"
+      parameters:
+      - in: query
+        required: true
+        name: token
+        description: "ログイントークン"
+        type: string
+      responses:
+        200:
+          description: "OK．（仮マッチしたユーザーを返す．）"
+          schema:
+            $ref: "#/definitions/UserTempMatch"
+        400:
+          description: "Bad Request"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "400"
+              message:
+                type: "string"
+                example: "Bad Request"
+        401:
+          description: "Unauthorized（トークン認証に失敗）"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "401"
+              message:
+                type: "string"
+                example: "Token Is Invalid"
+        500:
+          description: "Intern Server Error"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "500"
+              message:
+                type: "string"
+                example: "Internal Server Error"
+    post:
+      summary: "仮マッチするユーザーを検索する"
+      description: "
+        相性トークをするユーザーを検索します．<br>\
+      "
+      operationId: "postTempMatch"
+      parameters:
+      - in: query
+        name: token
+        required: true
+        description: "ログイントークン"
+        type: string
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "200"
+              message:
+                type: "string"
+                example: "OK"
+        400:
+          description: "Bad Request"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "400"
+              message:
+                type: "string"
+                example: "Bad Request"
+        401:
+          description: "Unauthorized (トークン認証に失敗)"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "401"
+              message:
+                type: "string"
+                example: "Token Is Invalid"
+        500:
+          description: "Internal Server Error"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "500"
+              message:
+                type: "string"
+                example: "Internal Server Error"
+    put:
+      summary: "相性トークのリクエストを中断する"
+      description: "
+        仮マッチするお相手の検索を中断します．<br>\
+      "
+      operationId: "putTempMatch"
+      parameters:
+      - in: query
+        required: true
+        name: token
+        description: "ログイントークン"
+        type: string
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "200"
+              message:
+                type: "string"
+        400:
+          description: "Bad Request"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "400"
+              message:
+                type: "string"
+                example: "Bad Request"
+        401:
+          description: "Unauthorized（トークン認証に失敗）"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "401"
+              message:
+                type: "string"
+                example: "Token Is Invalid"
+        500:
+          description: "Intern Server Error"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "500"
+              message:
+                type: "string"
+                example: "Internal Server Error"
+  /tempmatch/messages/{userId}:
+    get:
+      summary: "仮マッチしたユーザーとのメッセージ一覧を取得"
+      description: "
+        仮マッチしたユーザーとのメッセージ一覧を取得します．<br>\
+        user_idが送信者，partner_idが受診者です．．<br>\
+        latest / oldest / limit 方式での取得です. <br>\
+        latest / oldest は ISO8601(RFC3339) 形式で指定してください. <br>\
+      "
+      operationId: "getTempMessages"
+      parameters:
+      - $ref: '#/parameters/userIdParam'
+      - in: query
+        required: true
+        name: token
+        description: "ログイントークン"
+        type: string
+      - in: query
+        required: false
+        name: latest
+        description: "RFC3339 ex. 2018-08-20T16:00:00.000+09:00"
+        format: date-time
+        type: string
+      - in: query
+        required: false
+        name: oldest
+        description: "RFC3339 ex. 2018-08-20T16:00:00.000+09:00"
+        format: date-time
+        type: string
+      - in: query
+        required: true
+        name: limit
+        description: "取得件数"
+        type: integer
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/UserTempMessage"
+        400:
+          description: "Bad Request"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "400"
+              message:
+                type: "string"
+                example: "Bad Request"
+        401:
+          description: "Unauthorized (トークン認証に失敗)"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "401"
+              message:
+                type: "string"
+                example: "Token Is Invalid"
+        500:
+          description: "Internal Server Error"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "500"
+              message:
+                type: "string"
+                example: "Intern Server Error"
+    post:
+      summary: "メッセージ送信"
+      description: "
+        仮マッチ済みのお相手にメッセージを送ることができます．<br>\
+      "
+      operationId: "postTempMessage"
+      parameters:
+      - $ref: "#/parameters/userIdParam"
+      - in: body
+        name: params
+        description: リクエストパラメータ
+        schema:
+          type: object
+          properties:
+            token:
+              type: string
+              example: "YOUR_LOGIN_TOKEN"
+            message:
+              type: string
+              example: "わっほい"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: object
+            properties:
+              code:
+                type: "string"
+                example: "200"
+              message:
+                type: "string"
+                example: "OK"
         400:
           description: "Bad Request"
           schema:
