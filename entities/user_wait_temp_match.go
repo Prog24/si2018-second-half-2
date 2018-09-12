@@ -7,6 +7,7 @@ import (
 
 type UserWaitTempMatch struct {
 	UserID     int64           `xorm:"user_id"`
+	Gender     string          `xorm:"gender"`
 	IsMatched  bool            `xorm:"is_matched"`
 	IsCanceled bool            `xorm:"is_canceled"`
 	CreatedAt  strfmt.DateTime `xorm:"created_at"`
@@ -16,6 +17,7 @@ type UserWaitTempMatch struct {
 func (u UserWaitTempMatch) Build() models.UserWaitTempMatch {
 	return models.UserWaitTempMatch{
 		UserID:     u.UserID,
+		Gender:     u.Gender,
 		IsMatched:  u.IsMatched,
 		IsCanceled: u.IsCanceled,
 		CreatedAt:  u.CreatedAt,

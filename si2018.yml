@@ -473,6 +473,9 @@ definitions:
         format: "int64"
         description: "ユーザーID"
         example: "1"
+      gender:
+        type: "string"
+        description: "M or F string"
       is_matched:
         type: "boolean"
         description: "仮マッチしているかどうか"
