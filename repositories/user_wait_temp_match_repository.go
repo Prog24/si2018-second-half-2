@@ -34,3 +34,41 @@ func (r *UserWaitTempMatchRepository) Get(userID, partnerID int64) (*entities.Us
 	}
 	return nil, nil
 }
+
+func (r *UserWaitTempMatchRepository) IsIActive(user entities.User) (bool, error) {
+	var ent entities.UserWaitTempMatch
+
+	s := r.GetSession()
+	has, err := s.Where("user_id = ?", user.ID).And("gender = ?", user.Gender).And("is_matched = ?", false).And("is_canceled = ?", false).Get(&ent)
+	if err != nil {
+		return false, err
+	}
+	if has {
+		return true, nil
+	}
+	return false, nil
+}
+
+func (r *UserWaitTempMatchRepository) SearchPartner(user entities.User) (partnerID int64, err error) {
+	var ent entities.UserWaitTempMatch
+	oppositeGender := user.GetOppositeGender()
+
+	s := r.GetSession()
+	// NOTE: Select が必要かどうか検証必要
+	has, err := s.
+		Select("user_wait_temp_match.*, residence_state").
+		Join("INNER", "user", "user.id = user_wait_temp_match.user_id").
+		Where("gender = ?", oppositeGender).
+		And("residence_state = ?", user.ResidenceState).
+		And("is_matched = ?", false).
+		And("is_canceled = ?", false).
+		Get(&ent)
+
+	if err != nil {
+		return 0, err
+	}
+	if has {
+		return ent.UserID, nil
+	}
+	return 0, nil
+}
