@@ -9,7 +9,7 @@ type UserWaitTempMatchRepository struct {
 	RootRepository
 }
 
-func NewUserWaitMatchRepository(s *Session) UserWaitTempMatchRepository {
+func NewUserWaitTempMatchRepository(s *Session) UserWaitTempMatchRepository {
 	return UserWaitTempMatchRepository{NewRootRepository(s)}
 }
 
