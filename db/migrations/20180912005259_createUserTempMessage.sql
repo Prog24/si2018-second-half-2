@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS `user_temp_message` (
   `updated_at` datetime NOT NULL COMMENT 'レコード更新日時',
   PRIMARY KEY (`user_id`,`partner_id`,`created_at`),
   KEY `idx_temp_message_user_partner` (`partner_id`,`user_id`,`created_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='メッセージ';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='仮メッセージ';
 
 -- +goose Down
 -- SQL section 'Down' is executed when this migration is rolled back

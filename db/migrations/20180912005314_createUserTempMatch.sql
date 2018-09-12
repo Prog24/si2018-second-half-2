@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS `user_temp_match` (
   `updated_at` datetime NOT NULL COMMENT 'レコード更新日時',
   PRIMARY KEY (`user_id`, `partner_id`),
   KEY `idx_temp_partner_id_user_id` (`partner_id`, `user_id`, `created_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='マッチ';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='仮マッチ';
 
 -- +goose Down
 -- SQL section 'Down' is executed when this migration is rolled back
