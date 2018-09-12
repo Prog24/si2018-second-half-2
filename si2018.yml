@@ -1246,7 +1246,7 @@ paths:
               message:
                 type: "string"
                 example: "Internal Server Error"
-  /zerocrasher:
+  /tempmatch:
     get:
       summary: "仮マッチしたユーザーを取得する"
       description: "
@@ -1411,7 +1411,7 @@ paths:
               message:
                 type: "string"
                 example: "Internal Server Error"
-  /zerocrasher/messages/{userId}:
+  /tempmatch/messages/{userId}:
     get:
       summary: "仮マッチしたユーザーとのメッセージ一覧を取得"
       description: "
