@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS `user_wait_temp_match` (
   `is_canceled` boolean NOT NULL COMMENT 'リクエストキャンセル',
   `created_at` datetime NOT NULL COMMENT 'レコード作成日時',
   `updated_at` datetime NOT NULL COMMENT 'レコード更新日時',
-  PRIMARY KEY (`user_id`, `created_at`),
+  PRIMARY KEY (`user_id`, `created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='マッチ待ち';
 
 -- +goose Down
