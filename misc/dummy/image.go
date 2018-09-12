@@ -4,8 +4,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/eure/si2018-server-side/entities"
-	"github.com/eure/si2018-server-side/repositories"
+	"github.com/eure/si2018-second-half-2/entities"
+	"github.com/eure/si2018-second-half-2/repositories"
 	"github.com/go-openapi/strfmt"
 )
 
