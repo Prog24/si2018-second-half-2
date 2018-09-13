@@ -1,6 +1,7 @@
 package usertempmatch
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/go-openapi/runtime/middleware"
@@ -47,14 +48,14 @@ func GetTempMatch(p si.GetTempMatchParams) middleware.Responder {
 			return si.NewGetTempMatchInternalServerError().WithPayload(
 				&si.GetTempMatchInternalServerErrorBody{
 					Code:    "500",
-					Message: "Internal Server Error",
+					Message: "Internal Server Error :: Failed to FindAllByUserID" + err.Error(),
 				})
 		}
 		if matchCount != nil {
 			return si.NewGetTempMatchBadRequest().WithPayload(
 				&si.GetTempMatchBadRequestBody{
 					Code:    "400",
-					Message: "Bad Request",
+					Message: "Bad Requesa :: FindAllByUserID",
 				})
 		}
 	}
@@ -67,15 +68,15 @@ func GetTempMatch(p si.GetTempMatchParams) middleware.Responder {
 		return si.NewGetTempMatchInternalServerError().WithPayload(
 			&si.GetTempMatchInternalServerErrorBody{
 				Code:    "500",
-				Message: "Internal Server Error",
+				Message: "Internal Server Error :: GetActive" + err.Error(),
 			})
 	}
-	if activeEnt != nil {
+	if activeEnt == nil {
 		// アクティブが無い -> BAD REQUEST
 		return si.NewGetTempMatchBadRequest().WithPayload(
 			&si.GetTempMatchBadRequestBody{
 				Code:    "400",
-				Message: "Bad Request",
+				Message: "Bad Request :: GetActive",
 			})
 	}
 	// アクティブなレコードが存在する
@@ -86,12 +87,22 @@ func GetTempMatch(p si.GetTempMatchParams) middleware.Responder {
 		return si.NewGetTempMatchInternalServerError().WithPayload(
 			&si.GetTempMatchInternalServerErrorBody{
 				Code:    "500",
-				Message: "Internal Server Error",
+				Message: "Internal Server Error :: Check temp_match" + err.Error(),
 			})
 	}
 	if tempMatchEnt != nil {
 		// => 有効な temp_match 存在する   -> 既にマッチングしていたから、それを返す
 		// TODO: wait テーブルの is_matched をTRUEに変更する
+		activeEnt.IsMatched = true
+		err = waitR.Update(activeEnt)
+		if err != nil {
+			return si.NewGetTempMatchInternalServerError().WithPayload(
+				&si.GetTempMatchInternalServerErrorBody{
+					Code:    "500",
+					Message: "Internal Server Error :: Update is_matched -> true" + err.Error(),
+				})
+		}
+
 		response := tempMatchEnt.Build()
 		return si.NewGetTempMatchOK().WithPayload(&response)
 	}
@@ -101,7 +112,7 @@ func GetTempMatch(p si.GetTempMatchParams) middleware.Responder {
 		return si.NewGetTempMatchInternalServerError().WithPayload(
 			&si.GetTempMatchInternalServerErrorBody{
 				Code:    "500",
-				Message: "Internal Server Error",
+				Message: "Internal Server Error :: Search" + err.Error(),
 			})
 	}
 	if partnerID == 0 {
@@ -113,7 +124,7 @@ func GetTempMatch(p si.GetTempMatchParams) middleware.Responder {
 
 	// サーチ結果Partnerが見つかった
 	tempMatch := entities.UserTempMatch{
-		UserID: me.ID,
+		UserID:    me.ID,
 		PartnerID: partnerID,
 		CreatedAt: strfmt.DateTime(time.Now()),
 		UpdatedAt: strfmt.DateTime(time.Now()),
@@ -123,21 +134,32 @@ func GetTempMatch(p si.GetTempMatchParams) middleware.Responder {
 		return si.NewGetTempMatchInternalServerError().WithPayload(
 			&si.GetTempMatchInternalServerErrorBody{
 				Code:    "500",
-				Message: "Internal Server Error",
+				Message: "Internal Server Error :: create temp_match" + err.Error(),
 			})
 	}
 
 	// TODO: wait テーブルの is_matched をTRUEに変更する
-
-	responseEnt, err := tempMatchR.GetByUserID(me.ID)
+	activeEnt.IsMatched = true
+	err = waitR.Update(activeEnt)
 	if err != nil {
 		return si.NewGetTempMatchInternalServerError().WithPayload(
 			&si.GetTempMatchInternalServerErrorBody{
 				Code:    "500",
-				Message: "Internal Server Error",
+				Message: "Internal Server Error :: is_matched -> true (2)" + err.Error(),
 			})
 	}
-	response := responseEnt.Build()
+
+	// responseEnt, err := tempMatchR.GetByUserID(me.ID)
+	// if err != nil {
+	// 	return si.NewGetTempMatchInternalServerError().WithPayload(
+	// 		&si.GetTempMatchInternalServerErrorBody{
+	// 			Code:    "500",
+	// 			Message: "Internal Server Error",
+	// 		})
+	// }
+
+	// response := responseEnt.Build()
+	response := tempMatch.Build()
 	return si.NewGetTempMatchOK().WithPayload(&response)
 }
 
@@ -206,6 +228,7 @@ func PostTempMatch(p si.PostTempMatchParams) middleware.Responder {
 	}
 
 	// Check if you are active
+	var updatedWaitEnt entities.UserWaitTempMatch
 	activeEnt, err := waitRepo.GetActive(*me)
 	if err != nil {
 		return si.NewPostTempMatchInternalServerError().WithPayload(
@@ -226,15 +249,20 @@ func PostTempMatch(p si.PostTempMatchParams) middleware.Responder {
 			UpdatedAt:  now,
 		}
 
+		updatedWaitEnt = waitEnt
+
 		err = waitRepo.Create(waitEnt)
 		if err != nil {
 			return si.NewPostTempMatchInternalServerError().WithPayload(
 				&si.PostTempMatchInternalServerErrorBody{
 					Code:    "500",
-					Message: "Internal Server Error :: Failed to wait temp match",
+					Message: "Internal Server Error :: Failed to wait temp match" + err.Error(),
 				})
 		}
+	} else {
+		updatedWaitEnt = *activeEnt
 	}
+	fmt.Println(updatedWaitEnt)
 
 	// Search suited user for me
 	partnerID, err := waitRepo.SearchPartner(*me)
@@ -242,7 +270,7 @@ func PostTempMatch(p si.PostTempMatchParams) middleware.Responder {
 		return si.NewPostTempMatchInternalServerError().WithPayload(
 			&si.PostTempMatchInternalServerErrorBody{
 				Code:    "500",
-				Message: "Internal Server Error :: Failed to search partner",
+				Message: "Internal Server Error :: Failed to search partner" + err.Error(),
 			})
 	}
 	if partnerID == 0 {
@@ -259,6 +287,7 @@ func PostTempMatch(p si.PostTempMatchParams) middleware.Responder {
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
+	fmt.Println(tempmatchEnt)
 
 	tempmatchRepo := repositories.NewUserTempMatchRepository(s)
 	err = tempmatchRepo.Create(tempmatchEnt)
@@ -266,39 +295,45 @@ func PostTempMatch(p si.PostTempMatchParams) middleware.Responder {
 		return si.NewPostTempMatchInternalServerError().WithPayload(
 			&si.PostTempMatchInternalServerErrorBody{
 				Code:    "500",
-				Message: "Internal Server Error",
+				Message: "Internal Server Error :: Failed to create temp match" + err.Error(),
 			})
 	}
 
+	fmt.Println("after : create")
 	// TODO: Create したものを（TempMatch）をとってくる作業が必要
-	updatedWaitEnt, err := tempmatchRepo.GetLatest(tempmatchEnt.UserID, tempmatchEnt.CreatedAt)
-	if err != nil {
-		return si.NewPostTempMatchInternalServerError().WithPayload(
-			&si.PostTempMatchInternalServerErrorBody{
-				Code:    "500",
-				Message: "Internal Server Error",
-			})
-	}
-	if updatedWaitEnt == nil {
-		return si.NewPostTempMatchBadRequest().WithPayload(
-			&si.PostTempMatchBadRequestBody{
-				Code:    "400",
-				Message: "Bad Request :: Failed to get updated temp match",
-			})
-	}
+	// updatedWaitEnt, err := tempmatchRepo.GetLatest(tempmatchEnt.UserID, tempmatchEnt.CreatedAt)
+	// jst, _ := time.LoadLocation("JST")
+	// updatedWaitEnt, err := tempmatchRepo.GetLatest(tempmatchEnt.UserID, strfmt.DateTime(time.Date(2018, 9, 13, 20, 24, 10, 0, time.Now().In(jst))))
+	// if err != nil {
+	// 	return si.NewPostTempMatchInternalServerError().WithPayload(
+	// 		&si.PostTempMatchInternalServerErrorBody{
+	// 			Code:    "500",
+	// 			Message: "Internal Server Error :: Failed to Get updated temp match",
+	// 		})
+	// }
+	// if updatedWaitEnt == nil {
+	// 	return si.NewPostTempMatchBadRequest().WithPayload(
+	// 		&si.PostTempMatchBadRequestBody{
+	// 			Code:    "400",
+	// 			Message: "Bad Request :: Failed to get updated temp match",
+	// 		})
+	// }
 
 	// Update UserWaitTempMatch.IsMatch -> true
-	activeEnt.IsMatched = true
-	err = waitRepo.Update(activeEnt)
+	fmt.Println("before : update")
+	updatedWaitEnt.IsMatched = true
+	err = waitRepo.Update(&updatedWaitEnt)
 	if err != nil {
 		return si.NewPostTempMatchInternalServerError().WithPayload(
 			&si.PostTempMatchInternalServerErrorBody{
 				Code:    "500",
-				Message: "Internal Server Error",
+				Message: "Internal Server Error :: Failed to IsMatch -> true" + err.Error(),
 			})
 	}
+	fmt.Println("after : update")
 
-	sEnt := updatedWaitEnt.Build()
+	// sEnt := updatedWaitEnt.Build()
+	sEnt := tempmatchEnt.Build()
 	return si.NewPostTempMatchOK().WithPayload(&sEnt)
 }
 

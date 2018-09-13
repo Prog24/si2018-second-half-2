@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/eure/si2018-second-half-2/entities"
@@ -33,32 +34,6 @@ func (r *UserWaitTempMatchRepository) Update(ent *entities.UserWaitTempMatch) er
 	return nil
 }
 
-func (r *UserWaitTempMatchRepository) GetLatestWaitTempMatchInToday(userID int64) (*entities.UserWaitTempMatch, error) {
-	var ent = entities.UserWaitTempMatch{UserID: userID}
-
-	now := time.Now()
-	startTime := strfmt.DateTime(time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local))
-	endTime := strfmt.DateTime(time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 99, time.Local))
-
-	s := r.GetSession()
-	has, err := s.
-		Where("user_id = ?", userID).
-		And("created_at > ?", startTime).
-		And("created_at < ?", endTime).
-		And("is_matched = ?", false).
-		Desc("created_at").
-		Limit(1, 0).
-		Get(&ent)
-	if err != nil {
-		return nil, err
-	}
-	if has {
-		return &ent, nil
-	}
-
-	return nil, nil
-}
-
 func (r *UserWaitTempMatchRepository) IsMatchedToday(userID int64) (bool, error) {
 	var ent entities.UserWaitTempMatch
 
@@ -86,7 +61,7 @@ func (r *UserWaitTempMatchRepository) IsMatchedToday(userID int64) (bool, error)
 func (r *UserWaitTempMatchRepository) GetActive(user entities.User) (*entities.UserWaitTempMatch, error) {
 	var ent entities.UserWaitTempMatch
 	now := time.Now()
-	limitTime := strfmt.DateTime(now.Add(time.Duration(40) * time.Second))
+	limitTime := strfmt.DateTime(now.Add(time.Duration(-40) * time.Second))
 
 	s := r.GetSession()
 	has, err := s.
@@ -110,15 +85,21 @@ func (r *UserWaitTempMatchRepository) SearchPartner(user entities.User) (partner
 	var ent entities.UserWaitTempMatch
 	oppositeGender := user.GetOppositeGender()
 
+	now := time.Now()
+	limitTime := strfmt.DateTime(now.Add(time.Duration(-40) * time.Second))
+	fmt.Println(now)
+	fmt.Println(limitTime)
+
 	s := r.GetSession()
 	// NOTE: Select が必要かどうか検証必要
 	has, err := s.
 		Select("user_wait_temp_match.*, residence_state").
 		Join("INNER", "user", "user.id = user_wait_temp_match.user_id").
-		Where("gender = ?", oppositeGender).
+		Where("user_wait_temp_match.gender = ?", oppositeGender).
 		And("residence_state = ?", user.ResidenceState).
 		And("is_matched = ?", false).
 		And("is_canceled = ?", false).
+		And("user_wait_temp_match.created_at > ?", limitTime).
 		Get(&ent)
 
 	if err != nil {
