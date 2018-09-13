@@ -10,11 +10,13 @@ import (
 	runtime "github.com/go-openapi/runtime"
 
 	"github.com/eure/si2018-second-half-2/controllers/message"
+	"github.com/eure/si2018-second-half-2/controllers/tempmessage"
 	"github.com/eure/si2018-second-half-2/controllers/token"
 	"github.com/eure/si2018-second-half-2/controllers/user"
 	"github.com/eure/si2018-second-half-2/controllers/userimage"
 	"github.com/eure/si2018-second-half-2/controllers/userlike"
 	"github.com/eure/si2018-second-half-2/controllers/usermatch"
+	"github.com/eure/si2018-second-half-2/controllers/usertempmatch"
 	"github.com/eure/si2018-second-half-2/restapi/summerintern"
 )
 
@@ -48,6 +50,11 @@ func configureAPI(api *summerintern.SummerIntern2018API) http.Handler {
 	api.PostLikeHandler = summerintern.PostLikeHandlerFunc(userlike.PostLike)
 	api.GetMatchesHandler = summerintern.GetMatchesHandlerFunc(usermatch.GetMatches)
 	api.PostImagesHandler = summerintern.PostImagesHandlerFunc(userimage.PostImage)
+	api.GetTempMatchHandler = summerintern.GetTempMatchHandlerFunc(usertempmatch.GetTempMatch)
+	api.PostTempMatchHandler = summerintern.PostTempMatchHandlerFunc(usertempmatch.PostTempMatch)
+	api.PutTempMatchHandler = summerintern.PutTempMatchHandlerFunc(usertempmatch.PutTempMatch)
+	api.GetTempMessagesHandler = summerintern.GetTempMessagesHandlerFunc(tempmessage.GetTempMessages)
+	api.PostTempMessageHandler = summerintern.PostTempMessageHandlerFunc(tempmessage.PostTempMessage)
 
 	api.ServerShutdown = func() {}
 

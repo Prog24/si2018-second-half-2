@@ -66,7 +66,7 @@ func PostTempMessage(p si.PostTempMessageParams) middleware.Responder {
 
 	// Check I matched the partner
 	tempmatchRepo := repositories.NewUserTempMatchRepository(s)
-	tempmatch, err := tempmatchRepo.Get(me.ID, partnerID)
+	tempmatch, err := tempmatchRepo.Get(me.ID, partner.ID)
 	if err != nil {
 		return si.NewPostTempMessageInternalServerError().WithPayload(
 			&si.PostTempMessageInternalServerErrorBody{

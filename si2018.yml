@@ -1246,6 +1246,7 @@ paths:
               message:
                 type: "string"
                 example: "Internal Server Error"
+
   /tempmatch:
     get:
       summary: "仮マッチしたユーザーを取得する"
@@ -1314,14 +1315,7 @@ paths:
         200:
           description: "OK"
           schema:
-            type: object
-            properties:
-              code:
-                type: "string"
-                example: "200"
-              message:
-                type: "string"
-                example: "OK"
+            $ref: "#/definitions/UserTempMatch"
         400:
           description: "Bad Request"
           schema:

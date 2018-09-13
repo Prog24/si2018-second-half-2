@@ -41,7 +41,7 @@ func (r *UserTempMatchRepository) Get(userID, partnerID int64) (*entities.UserTe
 // me_idで有効なレコードを探す
 // 有効なレコードとは？？
 func (r *UserTempMatchRepository) GetByUserID(userID int64) (*entities.UserTempMatch, error) {
-	var ent = entities.UserTempMatch{}
+	var ent= entities.UserTempMatch{}
 
 	now := time.Now()
 	startTime := strfmt.DateTime(time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local))
@@ -65,8 +65,19 @@ func (r *UserTempMatchRepository) GetByUserID(userID int64) (*entities.UserTempM
 	if has {
 		return &ent, nil
 	}
+	return nil, nil
+}
+
+func (r *UserTempMatchRepository) GetLatest(userID int64, createdAt strfmt.DateTime) (*entities.UserTempMatch, error) {
+	var ent entities.UserTempMatch
+	s := r.GetSession()
+	has, err := s.Where("user_id = ?", userID).And("created_at = ?", createdAt).Get(&ent)
+	if err != nil {
+		return nil, err
+	}
+	if has {
+		return &ent, nil
+	}
 
 	return nil, nil
-
-	//return &ent, err
 }
