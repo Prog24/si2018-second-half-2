@@ -74,11 +74,10 @@
   version = "0.15.0"
 
 [[projects]]
-  digest = "1:4040a405299a99b6806159e43d125b22786d74fb113691d510a8e3c7a5f8deaa"
+  digest = "1:c5d674857728a31a6c91b67d4ef755b2301f5caa2b58e98f7a2684b1f950b449"
   name = "github.com/go-openapi/runtime"
   packages = [
     ".",
-    "client",
     "flagext",
     "logger",
     "middleware",
@@ -185,11 +184,10 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:bae551c1c09fd656ac90c6157a9059a8c9324629e4a1a7b4375ee8640cfea4f7"
+  digest = "1:500fd233d46dec5d64eaf3acbb0e585262c356947ec499f9d79aaa119ef62088"
   name = "golang.org/x/net"
   packages = [
     "context",
-    "context/ctxhttp",
     "idna",
     "netutil",
   ]
@@ -254,7 +252,6 @@
     "github.com/go-openapi/errors",
     "github.com/go-openapi/loads",
     "github.com/go-openapi/runtime",
-    "github.com/go-openapi/runtime/client",
     "github.com/go-openapi/runtime/flagext",
     "github.com/go-openapi/runtime/middleware",
     "github.com/go-openapi/runtime/security",
@@ -266,7 +263,6 @@
     "github.com/go-xorm/builder",
     "github.com/go-xorm/xorm",
     "github.com/jessevdk/go-flags",
-    "golang.org/x/net/context",
     "golang.org/x/net/netutil",
   ]
   solver-name = "gps-cdcl"
