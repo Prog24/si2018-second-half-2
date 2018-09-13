@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"github.com/eure/si2018-second-half-2/entities"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-xorm/builder"
 )
 
@@ -27,6 +28,19 @@ func (r *UserTempMatchRepository) Get(userID, partnerID int64) (*entities.UserTe
 	var ids = []int64{userID, partnerID}
 	s := r.GetSession()
 	has, err := s.Where(builder.In("user_id", ids).And(builder.In("partner_id", ids))).Get(&ent)
+	if err != nil {
+		return nil, err
+	}
+	if has {
+		return &ent, nil
+	}
+	return nil, nil
+}
+
+func (r *UserTempMatchRepository) GetLatest(userID int64, createdAt strfmt.DateTime) (*entities.UserTempMatch, error) {
+	var ent entities.UserTempMatch
+	s := r.GetSession()
+	has, err := s.Where("user_id = ?", userID).And("created_at = ?", createdAt).Get(&ent)
 	if err != nil {
 		return nil, err
 	}
