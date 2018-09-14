@@ -1,7 +1,6 @@
 package repositories
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/eure/si2018-second-half-2/entities"
@@ -31,7 +30,6 @@ func (r *UserWaitTempMatchRepository) Update(ent *entities.UserWaitTempMatch) er
 	ent.UpdatedAt = now
 	defer func() { log.Println(s.LastSQL()) }()
 	if _, err := s.Cols("user_id", "gender", "is_matched", "is_canceled", "created_at", "updated_at").Update(ent); err != nil {
-		fmt.Println(err)
 		return err
 	}
 	return nil
@@ -90,8 +88,6 @@ func (r *UserWaitTempMatchRepository) SearchPartner(user entities.User) (partner
 
 	now := time.Now()
 	limitTime := strfmt.DateTime(now.Add(time.Duration(-40) * time.Second))
-	fmt.Println(now)
-	fmt.Println(limitTime)
 
 	s := r.GetSession()
 	// NOTE: Select が必要かどうか検証必要

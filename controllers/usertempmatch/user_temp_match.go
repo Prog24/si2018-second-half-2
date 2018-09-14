@@ -1,7 +1,6 @@
 package usertempmatch
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/go-openapi/runtime/middleware"
@@ -9,7 +8,6 @@ import (
 
 	"github.com/eure/si2018-second-half-2/entities"
 	tokenlib "github.com/eure/si2018-second-half-2/libs/token"
-	// userlib "github.com/eure/si2018-second-half-2/libs/user"
 	"github.com/eure/si2018-second-half-2/repositories"
 	si "github.com/eure/si2018-second-half-2/restapi/summerintern"
 )
@@ -92,7 +90,7 @@ func GetTempMatch(p si.GetTempMatchParams) middleware.Responder {
 	}
 	if tempMatchEnt != nil {
 		// => 有効な temp_match 存在する   -> 既にマッチングしていたから、それを返す
-		// TODO: wait テーブルの is_matched をTRUEに変更する
+		// 自身の wait テーブルの is_matched -> True
 		activeEnt.IsMatched = true
 		err = waitR.Update(activeEnt)
 		if err != nil {
@@ -103,7 +101,7 @@ func GetTempMatch(p si.GetTempMatchParams) middleware.Responder {
 				})
 		}
 
-		// TODO: 相手の UserWaitTempMatch の is_matched -> true
+		// 相手の wait テーブルの is_matched -> True
 		updatedPartnerWaitEnt, err := waitR.GetLatestByUserID(tempMatchEnt.PartnerID)
 		if err != nil {
 			return si.NewPostTempMatchInternalServerError().WithPayload(
@@ -165,7 +163,7 @@ func GetTempMatch(p si.GetTempMatchParams) middleware.Responder {
 			})
 	}
 
-	// TODO: wait テーブルの is_matched をTRUEに変更する
+	// 自身の wait テーブルの is_matched -> True
 	activeEnt.IsMatched = true
 	err = waitR.Update(activeEnt)
 	if err != nil {
@@ -176,7 +174,7 @@ func GetTempMatch(p si.GetTempMatchParams) middleware.Responder {
 			})
 	}
 
-	// TODO: 相手の UserWaitTempMatch の is_matched -> true
+	// 相手の wait テーブルの is_matched -> True
 	updatedPartnerWaitEnt, err := waitR.GetLatestByUserID(tempMatch.PartnerID)
 	if err != nil {
 		return si.NewPostTempMatchInternalServerError().WithPayload(
@@ -282,7 +280,7 @@ func PostTempMatch(p si.PostTempMatchParams) middleware.Responder {
 	}
 
 	// Check if you are active
-	var updatedWaitEnt entities.UserWaitTempMatch
+	// var updatedWaitEnt entities.UserWaitTempMatch
 	activeEnt, err := waitRepo.GetActive(*me)
 	if err != nil {
 		return si.NewPostTempMatchInternalServerError().WithPayload(
@@ -303,7 +301,7 @@ func PostTempMatch(p si.PostTempMatchParams) middleware.Responder {
 			UpdatedAt:  now,
 		}
 
-		updatedWaitEnt = waitEnt
+		// updatedWaitEnt = waitEnt
 
 		err = waitRepo.Create(waitEnt)
 		if err != nil {
@@ -314,9 +312,8 @@ func PostTempMatch(p si.PostTempMatchParams) middleware.Responder {
 				})
 		}
 	} else {
-		updatedWaitEnt = *activeEnt
+		// updatedWaitEnt = *activeEnt
 	}
-	fmt.Println(updatedWaitEnt)
 
 	// Search suited user for me
 	partnerID, err := waitRepo.SearchPartner(*me)
@@ -345,7 +342,6 @@ func PostTempMatch(p si.PostTempMatchParams) middleware.Responder {
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
-	fmt.Println(tempmatchEnt)
 
 	tempmatchRepo := repositories.NewUserTempMatchRepository(s)
 	err = tempmatchRepo.Create(tempmatchEnt)
@@ -357,56 +353,6 @@ func PostTempMatch(p si.PostTempMatchParams) middleware.Responder {
 			})
 	}
 
-	fmt.Println("after : create")
-	// TODO: Create したものを（TempMatch）をとってくる作業が必要
-	// updatedWaitEnt, err := tempmatchRepo.GetLatest(tempmatchEnt.UserID, tempmatchEnt.CreatedAt)
-	// jst, _ := time.LoadLocation("JST")
-	// updatedWaitEnt, err := tempmatchRepo.GetLatest(tempmatchEnt.UserID, strfmt.DateTime(time.Date(2018, 9, 13, 20, 24, 10, 0, time.Now().In(jst))))
-	// if err != nil {
-	// 	return si.NewPostTempMatchInternalServerError().WithPayload(
-	// 		&si.PostTempMatchInternalServerErrorBody{
-	// 			Code:    "500",
-	// 			Message: "Internal Server Error :: Failed to Get updated temp match",
-	// 		})
-	// }
-	// if updatedWaitEnt == nil {
-	// 	return si.NewPostTempMatchBadRequest().WithPayload(
-	// 		&si.PostTempMatchBadRequestBody{
-	// 			Code:    "400",
-	// 			Message: "Bad Request :: Failed to get updated temp match",
-	// 		})
-	// }
-
-	// Update UserWaitTempMatch.IsMatch -> true
-	// fmt.Println("before : update")
-	// updatedWaitEnt.IsMatched = true
-	// err = waitRepo.Update(&updatedWaitEnt)
-	// if err != nil {
-	// 	return si.NewPostTempMatchInternalServerError().WithPayload(
-	// 		&si.PostTempMatchInternalServerErrorBody{
-	// 			Code:    "500",
-	// 			Message: "Internal Server Error :: Failed to IsMatch -> true" + err.Error(),
-	// 		})
-	// }
-	// fmt.Println("after : update")
-	//
-	// // TODO: 相手の UserWaitTempMatch の is_matched -> true
-	// updatedPartnerWaitEnt, err := waitRepo.GetLatestByUserID(tempmatchEnt.PartnerID)
-	// if err != nil {
-	// 	return si.NewPostTempMatchInternalServerError().WithPayload(
-	// 		&si.PostTempMatchInternalServerErrorBody{
-	// 			Code:    "500",
-	// 			Message: "Internal Server Error :: Failed to get partner's UserWaitTempMatch " + err.Error(),
-	// 		})
-	// }
-	// if updatedPartnerWaitEnt == nil {
-	// 	return si.NewPostTempMatchBadRequest().WithPayload(
-	// 		&si.PostTempMatchBadRequestBody{
-	// 			Code:    "400",
-	// 			Message: "Bad Request :: Failed to get partner's UserWaitTempMatch",
-	// 		})
-	// }
-	//
 	// updatedPartnerWaitEnt.IsMatched = true
 	// err = waitRepo.Update(updatedPartnerWaitEnt)
 	// if err != nil {
