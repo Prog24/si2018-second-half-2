@@ -274,7 +274,11 @@ func PostTempMatch(p si.PostTempMatchParams) middleware.Responder {
 			})
 	}
 	if partnerID == 0 {
-		var emptyEnt entities.UserTempMatch
+
+		emptyEnt := entities.UserTempMatch{
+			CreatedAt: strfmt.DateTime(time.Now()),
+			UpdatedAt: strfmt.DateTime(time.Now()),
+		}
 		sEnt := emptyEnt.Build()
 		return si.NewPostTempMatchOK().WithPayload(&sEnt)
 	}
