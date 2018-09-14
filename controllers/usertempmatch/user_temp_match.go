@@ -351,44 +351,44 @@ func PostTempMatch(p si.PostTempMatchParams) middleware.Responder {
 	// }
 
 	// Update UserWaitTempMatch.IsMatch -> true
-	fmt.Println("before : update")
-	updatedWaitEnt.IsMatched = true
-	err = waitRepo.Update(&updatedWaitEnt)
-	if err != nil {
-		return si.NewPostTempMatchInternalServerError().WithPayload(
-			&si.PostTempMatchInternalServerErrorBody{
-				Code:    "500",
-				Message: "Internal Server Error :: Failed to IsMatch -> true" + err.Error(),
-			})
-	}
-	fmt.Println("after : update")
-
-	// TODO: 相手の UserWaitTempMatch の is_matched -> true
-	updatedPartnerWaitEnt, err := waitRepo.GetLatestByUserID(tempmatchEnt.PartnerID)
-	if err != nil {
-		return si.NewPostTempMatchInternalServerError().WithPayload(
-			&si.PostTempMatchInternalServerErrorBody{
-				Code:    "500",
-				Message: "Internal Server Error :: Failed to get partner's UserWaitTempMatch " + err.Error(),
-			})
-	}
-	if updatedPartnerWaitEnt == nil {
-		return si.NewPostTempMatchBadRequest().WithPayload(
-			&si.PostTempMatchBadRequestBody{
-				Code:    "400",
-				Message: "Bad Request :: Failed to get partner's UserWaitTempMatch",
-			})
-	}
-
-	updatedPartnerWaitEnt.IsMatched = true
-	err = waitRepo.Update(updatedPartnerWaitEnt)
-	if err != nil {
-		return si.NewPostTempMatchInternalServerError().WithPayload(
-			&si.PostTempMatchInternalServerErrorBody{
-				Code:    "500",
-				Message: "Internal Server Error :: Failed to change partner's is_matched -> true",
-			})
-	}
+	// fmt.Println("before : update")
+	// updatedWaitEnt.IsMatched = true
+	// err = waitRepo.Update(&updatedWaitEnt)
+	// if err != nil {
+	// 	return si.NewPostTempMatchInternalServerError().WithPayload(
+	// 		&si.PostTempMatchInternalServerErrorBody{
+	// 			Code:    "500",
+	// 			Message: "Internal Server Error :: Failed to IsMatch -> true" + err.Error(),
+	// 		})
+	// }
+	// fmt.Println("after : update")
+	//
+	// // TODO: 相手の UserWaitTempMatch の is_matched -> true
+	// updatedPartnerWaitEnt, err := waitRepo.GetLatestByUserID(tempmatchEnt.PartnerID)
+	// if err != nil {
+	// 	return si.NewPostTempMatchInternalServerError().WithPayload(
+	// 		&si.PostTempMatchInternalServerErrorBody{
+	// 			Code:    "500",
+	// 			Message: "Internal Server Error :: Failed to get partner's UserWaitTempMatch " + err.Error(),
+	// 		})
+	// }
+	// if updatedPartnerWaitEnt == nil {
+	// 	return si.NewPostTempMatchBadRequest().WithPayload(
+	// 		&si.PostTempMatchBadRequestBody{
+	// 			Code:    "400",
+	// 			Message: "Bad Request :: Failed to get partner's UserWaitTempMatch",
+	// 		})
+	// }
+	//
+	// updatedPartnerWaitEnt.IsMatched = true
+	// err = waitRepo.Update(updatedPartnerWaitEnt)
+	// if err != nil {
+	// 	return si.NewPostTempMatchInternalServerError().WithPayload(
+	// 		&si.PostTempMatchInternalServerErrorBody{
+	// 			Code:    "500",
+	// 			Message: "Internal Server Error :: Failed to change partner's is_matched -> true",
+	// 		})
+	// }
 
 	// sEnt := updatedWaitEnt.Build()
 	sEnt := tempmatchEnt.Build()
