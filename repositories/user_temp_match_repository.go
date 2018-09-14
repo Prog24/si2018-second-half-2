@@ -1,7 +1,6 @@
 package repositories
 
 import (
-	"fmt"
 	"github.com/eure/si2018-second-half-2/entities"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-xorm/builder"
@@ -69,13 +68,9 @@ func (r *UserTempMatchRepository) GetByUserID(userID int64) (*entities.UserTempM
 }
 
 func (r *UserTempMatchRepository) GetLatest(userID int64, createdAt strfmt.DateTime) (*entities.UserTempMatch, error) {
-	// fmt.Println(string(createdAt))
-	// fmt.Println(createdAt.String())
 	var ent = entities.UserTempMatch{}
 	s := r.GetSession()
 	has, err := s.Where("user_id = ?", userID).Or("partner_id = ?", userID).And("created_at = ?", createdAt).Get(&ent)
-	fmt.Println(has)
-	// fmt.Println(&ent)
 	if err != nil {
 		return nil, err
 	}
