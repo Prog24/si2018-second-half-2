@@ -103,6 +103,33 @@ func GetTempMatch(p si.GetTempMatchParams) middleware.Responder {
 				})
 		}
 
+		// TODO: 相手の UserWaitTempMatch の is_matched -> true
+		updatedPartnerWaitEnt, err := waitR.GetLatestByUserID(tempMatchEnt.PartnerID)
+		if err != nil {
+			return si.NewPostTempMatchInternalServerError().WithPayload(
+				&si.PostTempMatchInternalServerErrorBody{
+					Code:    "500",
+					Message: "Internal Server Error :: Failed to get partner's UserWaitTempMatch " + err.Error(),
+				})
+		}
+		if updatedPartnerWaitEnt == nil {
+			return si.NewPostTempMatchBadRequest().WithPayload(
+				&si.PostTempMatchBadRequestBody{
+					Code:    "400",
+					Message: "Bad Request :: Failed to get partner's UserWaitTempMatch",
+				})
+		}
+
+		updatedPartnerWaitEnt.IsMatched = true
+		err = waitR.Update(updatedPartnerWaitEnt)
+		if err != nil {
+			return si.NewPostTempMatchInternalServerError().WithPayload(
+				&si.PostTempMatchInternalServerErrorBody{
+					Code:    "500",
+					Message: "Internal Server Error :: Failed to change partner's is_matched -> true",
+				})
+		}
+
 		response := tempMatchEnt.Build()
 		return si.NewGetTempMatchOK().WithPayload(&response)
 	}
