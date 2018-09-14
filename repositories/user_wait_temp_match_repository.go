@@ -6,6 +6,7 @@ import (
 
 	"github.com/eure/si2018-second-half-2/entities"
 	"github.com/go-openapi/strfmt"
+	"log"
 )
 
 type UserWaitTempMatchRepository struct {
@@ -28,7 +29,9 @@ func (r *UserWaitTempMatchRepository) Update(ent *entities.UserWaitTempMatch) er
 	now := strfmt.DateTime(time.Now())
 	s := r.GetSession().Where("user_id = ?", ent.UserID).And("created_at = ?", ent.CreatedAt)
 	ent.UpdatedAt = now
-	if _, err := s.Update(ent); err != nil {
+	defer func() { log.Println(s.LastSQL()) }()
+	if _, err := s.Cols("user_id", "gender", "is_matched", "is_canceled", "created_at", "updated_at").Update(ent); err != nil {
+		fmt.Println(err)
 		return err
 	}
 	return nil
