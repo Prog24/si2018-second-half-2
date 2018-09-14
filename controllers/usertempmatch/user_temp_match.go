@@ -150,7 +150,7 @@ func GetTempMatch(p si.GetTempMatchParams) middleware.Responder {
 	}
 
 	// TODO: 相手の UserWaitTempMatch の is_matched -> true
-	updatedPartnerWaitEnt, err := waitRepo.GetLatestByUserID(tempmatchEnt.PartnerID)
+	updatedPartnerWaitEnt, err := waitR.GetLatestByUserID(tempMatch.PartnerID)
 	if err != nil {
 		return si.NewPostTempMatchInternalServerError().WithPayload(
 			&si.PostTempMatchInternalServerErrorBody{
@@ -167,7 +167,7 @@ func GetTempMatch(p si.GetTempMatchParams) middleware.Responder {
 	}
 
 	updatedPartnerWaitEnt.IsMatched = true
-	err = waitRepo.Update(updatedPartnerWaitEnt)
+	err = waitR.Update(updatedPartnerWaitEnt)
 	if err != nil {
 		return si.NewPostTempMatchInternalServerError().WithPayload(
 			&si.PostTempMatchInternalServerErrorBody{
